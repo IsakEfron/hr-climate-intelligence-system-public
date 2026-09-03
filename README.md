@@ -27,7 +27,7 @@
 
 ## Descripción General
 
-**CANELS** es el sistema interno de clima laboral de **Canel's**, desarrollado para capturar, procesar, analizar y reportar el nivel de satisfacción de los colaboradores a través de encuestas periódicas aplicadas en todas las plantas y áreas de la organización.
+El sistema interno de clima laboral, desarrollado para capturar, procesar, analizar y reportar el nivel de satisfacción de los colaboradores a través de encuestas periódicas aplicadas en todas las plantas y áreas de la organización.
 
 El sistema centraliza todo el ciclo de vida de las encuestas de clima laboral: desde la importación masiva de respuestas recolectadas en Google Forms hasta la generación de reportes ejecutivos en Word y Excel, pasando por dashboards interactivos con filtros por planta, área, género y antigüedad.
 
@@ -96,8 +96,8 @@ Diseñado para:
 
 ```bash
 # 1. Clonar o descargar el repositorio
-git clone https://github.com/tu-usuario/canels.git
-cd canels
+git clone https://github.com/tu-usuario/proyect.git
+cd carpeta
 
 # 2. Ejecutar instalador
 python setup.py
@@ -141,7 +141,7 @@ python app.py
 DB_HOST=localhost
 DB_USER=tu_usuario
 DB_PASSWORD=tu_contraseña
-DB_NAME=canels_db
+DB_NAME=proyect_db
 
 # Generar con: python -c "import secrets; print(secrets.token_hex(32))"
 SECRET_KEY=<64_caracteres_aleatorios>
@@ -163,7 +163,7 @@ HTTPS_ENABLED=false
 ## Estructura del Proyecto
 
 ```
-canels/
+proyect/
 │
 ├── app.py                          # Aplicación Flask — rutas y APIs
 ├── config.py                       # Configuración centralizada
@@ -204,8 +204,8 @@ canels/
 │   │   ├── notifications.js        # Sistema de notificaciones
 │   │   └── admin_actions.js        # Acciones administrativas
 │   └── img/
-│       ├── canels-Logo.png
-│       └── canels-icon.png
+│       ├── -Logo.png
+│       └── -icon.png
 │
 ├── templates/                      # Plantillas HTML (Jinja2)
 │   ├── login.html                  # Página de login y registro
@@ -365,7 +365,7 @@ Ver archivo [LICENSE](LICENSE) para el texto completo.
 - [ ] Contraseña del SuperAdmin cambiada
 - [ ] `.env` en `.gitignore`
 - [ ] `HTTPS_ENABLED=true` una vez configurado el certificado SSL
-- [ ] Usuario de MySQL con permisos mínimos solo sobre `canels_db`
+- [ ] Usuario de MySQL con permisos mínimos solo sobre `proyect_db`
 
 Ver [docs/PROPUESTA_PRODUCCION.md](docs/PROPUESTA_PRODUCCION.md) para la guía de despliegue con IIS + Waitress en Windows Server.
 
@@ -398,7 +398,7 @@ No. Solo MySQL 8.0+.
 
 <div align="center">
 
-**CANELS v2.1.0** &nbsp;|&nbsp; © 2026 Gael Alvarado &nbsp;|&nbsp; MIT License
+** v2.1.0** &nbsp;|&nbsp; © 2026 Gael Alvarado &nbsp;|&nbsp; MIT License
 
 Sistema de Clima Laboral &nbsp;|&nbsp; Uso Interno — Canel's
 
