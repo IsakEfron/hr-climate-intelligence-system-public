@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <script src="/static/js/csrf.js"></script>
+    <link rel="icon" type="image/x-icon" href="/static/img/canels-icon.png">
+    <link rel="stylesheet" href="/static/src/tailwindcss.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+    <title>Canels</title>
+</head>
+
+<body class="bg-gray-100 min-h-screen font-display">
+    <header class="bg-primary shadow-md w-full font-sans">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col md:flex-row justify-between items-center h-auto md:h-24 py-4 md:py-0">
+                <a class="flex-shrink-0 flex items-center bg-white p-3 rounded-xl mb-4 md:mb-0 hover:shadow-lg transition duration-300"
+                    href="index.html">
+                    <img class="h-10 md:h-12 w-auto" src="/static/img/canels-Logo.png" alt="Logo Canels">
+                </a>
+                <nav class="flex flex-wrap justify-center md:justify-end items-center gap-3 md:gap-6 w-full md:w-auto">
+                    <a href="analitica.html"
+                        class="text-white font-bold text-sm md:text-base transition px-2 py-1 rounded hover:bg-white/10">Analítica</a>
+                    <a href="grafico.html"
+                        class="text-white font-bold text-sm md:text-base transition px-2 py-1 rounded hover:bg-white/10">Gráfico</a>
+                    <a href="update.html"
+                        class="text-white font-bold text-sm md:text-base transition px-2 py-1 rounded hover:bg-white/10">Preguntas</a>
+                    <a href="import_export.html"
+                        class="text-white font-bold text-sm md:text-base transition px-2 py-1 rounded hover:bg-white/10">Datos</a>
+                    <div class="relative">
+                        <button id="notificationBtn" onclick="toggleNotifications()"
+                            class="relative text-white hover:bg-white/10 p-2 rounded-lg transition">
+                            <i class="fas fa-bell text-xl"></i>
+                            <span id="notificationBadge"
+                                class="hidden absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center animate-pulse">0</span>
+                        </button>
+                    </div>
+                    <a href="/logout"
+                        class="ml-2 bg-white-light hover:bg-red-100 text-black text-xs md:text-sm font-bold py-2 px-4 rounded-lg flex items-center gap-2 transition shadow-md hover:scale-105 transform">
+                        <i class="fas fa-sign-out-alt"></i><span>Salir</span>
+                    </a>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- Panel de notificaciones -->
+    <div id="notificationPanel"
+        class="hidden fixed top-24 right-4 md:right-8 z-50 bg-white rounded-2xl shadow-2xl border border-gray-200 w-full md:w-[500px] max-w-[95vw] max-h-[600px] overflow-hidden"
+        style="transform: translateY(-20px); opacity: 0; transition: all 0.3s ease;">
+        <div class="bg-gradient-to-r from-primary to-blue-600 text-white p-4 flex justify-between items-center">
+            <div class="flex items-center gap-2"><i class="fas fa-calendar-alt text-xl"></i>
+                <h3 class="font-bold text-lg">Mantenimientos Programados</h3>
+            </div>
+            <button onclick="toggleNotifications()" class="hover:bg-white/20 p-2 rounded-lg transition"><i
+                    class="fas fa-times"></i></button>
+        </div>
+        <div id="notificationContent" class="overflow-y-auto max-h-[500px] p-4">
+            <div class="flex flex-col items-center justify-center py-12 text-gray-400"><i
+                    class="fas fa-spinner fa-spin text-4xl mb-3"></i>
+                <p>Cargando...</p>
+            </div>
+        </div>
+        <div class="bg-gray-50 border-t border-gray-200 p-3 text-center">
+            <a href="maintenance.html" class="text-sm text-primary hover:text-blue-700 font-semibold">Ver agenda
+                completa <i class="fas fa-arrow-right ml-1"></i></a>
+        </div>
+    </div>
+
+    <main class="max-w-9/10 mx-auto px-2 pt-8 pb-24">
+        <div class="flex justify-between items-center mb-6 flex-col md:gap-4">
+            <h1 class="text-black font-bold text-3xl m-2 sm:m-1">Gestión de Preguntas y Población</h1>
+            <div
+                class="flex items-center gap-3 bg-white p-3 rounded-xl shadow-sm border border-gray-200 md:mr-1 flex-col">
+                <label class="text-xs font-bold text-gray-500 uppercase tracking-wide">
+                    <i class="far fa-calendar-alt mr-1"></i> Periodo:
+                </label>
+                <select id="globalPeriodo" onchange="fetchQuestions(); loadPoblacion();"
+                    class="bg-transparent text-gray-800 font-bold outline-none text-sm cursor-pointer border-b border-transparent hover:border-gray-300 transition pr-2">
+                </select>
+            </div>
+
+            <!-- BOTÓN IMPORTAR CATEGORÍAS DESDE JSON -->
+            <div class="flex items-center gap-3 m-5 sm:m-1">
+                <label for="jsonCategoriaInput"
+                    class="cursor-pointer bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold py-2 px-5 rounded-lg shadow transition flex items-center gap-2">
+                    <i class="fas fa-file-code"></i> Importar categorías (JSON)
+                </label>
+                <input type="file" id="jsonCategoriaInput" accept=".json" class="hidden"
+                    onchange="importarCategoriasJSON(this)">
+                <span id="jsonImportStatus" class="text-xs text-gray-500 hidden"></span>
+            </div>
+        </div>
+
+        <!-- === TABLA DE PREGUNTAS === -->
+        <div class="overflow-x-auto rounded-lg shadow-lg mb-10">
+            <table class="w-full text-left border-collapse bg-white">
+                <thead class="bg-primary text-white">
+                    <tr>
+                        <th class="p-4 font-semibold text-sm w-20 text-center">No.</th>
+                        <th class="p-4 font-semibold text-sm">Texto</th>
+                        <th class="p-4 font-semibold text-sm w-32">Tipo</th>
+                        <th class="p-4 font-semibold text-sm w-48">Categoría</th>
+                        <th class="p-4 font-semibold text-sm w-40 text-center">Periodo</th>
+                        <th class="p-4 font-semibold text-sm text-center w-32">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="questionsTableBody" class="text-gray-700 text-sm"></tbody>
+            </table>
+        </div>
+
+        <!-- === SECCIÓN DE POBLACIÓN POR PLANTA === -->
+        <div class="bg-white rounded-2xl shadow-lg border border-gray-200 p-6">
+            <div class="flex justify-between items-center mb-4">
+                <div>
+                    <h2 class="text-xl font-bold text-gray-800 flex items-center gap-2">
+                        <i class="fas fa-users text-indigo-500"></i> Población por Centro de Trabajo
+                    </h2>
+                    <p class="text-xs text-gray-500 mt-1">Registra el total de empleados (población) de cada planta para
+                        el periodo seleccionado.</p>
+                </div>
+            </div>
+
+            <!-- Formulario para agregar -->
+            <div class="bg-indigo-50 border border-indigo-100 rounded-xl p-4 mb-6">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+                    <div>
+                        <label class="text-xs font-bold text-gray-600 uppercase mb-1 block">Centro de Trabajo</label>
+                        <select id="poblacionPlantaSelect"
+                            class="w-full bg-white border border-gray-300 text-gray-700 py-2 px-3 rounded-lg text-sm font-medium focus:ring-2 focus:ring-indigo-500 outline-none">
+                            <option value="">-- Seleccionar Centro de Trabajo --</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-xs font-bold text-gray-600 uppercase mb-1 block">Población Total</label>
+                        <input type="number" id="poblacionNumInput" min="0" placeholder="Ej: 350"
+                            class="w-full bg-white border border-gray-300 text-gray-700 py-2 px-3 rounded-lg text-sm font-bold focus:ring-2 focus:ring-indigo-500 outline-none text-center">
+                    </div>
+                    <div>
+                        <button onclick="addPoblacion()"
+                            class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-6 rounded-lg shadow-md transition transform active:scale-95">
+                            <i class="fas fa-plus mr-2"></i> Agregar
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tabla de población -->
+            <div class="overflow-x-auto rounded-lg border border-gray-200">
+                <table class="w-full text-left border-collapse">
+                    <thead class="bg-gradient-to-r from-indigo-50 to-indigo-100 text-indigo-800 uppercase text-xs">
+                        <tr>
+                            <th class="p-3 font-semibold">Centro de Trabajo</th>
+                            <th class="p-3 font-semibold text-center w-40">Población</th>
+                            <th class="p-3 font-semibold text-center w-40">Encuestados</th>
+                            <th class="p-3 font-semibold text-center w-24">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="poblacionTableBody" class="text-sm text-gray-700 divide-y divide-gray-100">
+                        <tr>
+                            <td colspan="4" class="text-center p-6 text-gray-400">Selecciona un periodo para ver datos.
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Botón flotante agregar pregunta -->
+        <!-- <button onclick="openAddModal()"
+            class="fixed bottom-10 right-10 bg-teal-600 hover:bg-teal-700 text-white rounded-full w-14 h-14 flex items-center justify-center shadow-2xl text-3xl transition transform hover:scale-110 z-10">
+            <i class="fas fa-plus"></i>
+        </button> -->
+    </main>
+
+    <!-- Modal agregar/editar pregunta -->
+    <div id="formModal"
+        class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm transition-opacity duration-300">
+        <div class="bg-white rounded-xl shadow-2xl p-6 w-full max-w-lg relative transform scale-100 transition-transform duration-300"
+            id="formModalContent">
+            <button onclick="closeFormModal()"
+                class="absolute top-4 right-4 text-gray-400 hover:text-red-500 transition"><i
+                    class="fas fa-times text-xl"></i></button>
+            <h3 id="modalTitle" class="text-2xl font-bold text-gray-800 mb-6 text-center">Agregar Pregunta</h3>
+            <form id="questionForm" onsubmit="handleFormSubmit(event)">
+                <div class="grid grid-cols-2 gap-4 mb-4">
+                    <div class="flex flex-col">
+                        <label class="text-xs font-bold text-gray-500 uppercase mb-1">Número</label>
+                        <input type="number" step="0.01" id="inputId"
+                            class="bg-gray-50 border border-gray-300 text-gray-800 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-teal-500 text-center font-bold"
+                            placeholder="#">
+                    </div>
+                    <div class="flex flex-col">
+                        <label class="text-xs font-bold text-gray-500 uppercase mb-1">Tipo</label>
+                        <select id="inputType"
+                            class="bg-gray-50 border border-gray-300 text-gray-800 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-teal-500">
+                            <option value="escala">Escala</option>
+                            <option value="abierta">Abierta</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <label class="text-xs font-bold text-gray-500 uppercase mb-1">Categoría</label>
+                    <input type="text" id="inputCategory"
+                        class="bg-gray-50 border border-gray-300 text-gray-800 rounded-lg px-3 py-2 w-full outline-none focus:ring-2 focus:ring-teal-500"
+                        placeholder="Ej. Liderazgo">
+                </div>
+                <div class="mb-6">
+                    <label class="text-xs font-bold text-gray-500 uppercase mb-1">Pregunta</label>
+                    <textarea id="inputText" rows="3"
+                        class="bg-gray-50 border border-gray-300 text-gray-800 rounded-lg px-3 py-2 w-full outline-none focus:ring-2 focus:ring-teal-500 resize-none"
+                        placeholder="Escribe el texto aquí..."></textarea>
+                </div>
+                <button type="submit"
+                    class="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-3 rounded-lg shadow transition">Guardar
+                    Cambios</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal confirmar eliminar pregunta -->
+    <div id="deleteModal"
+        class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm">
+        <div class="bg-white rounded-xl p-8 max-w-sm w-full text-center">
+            <i class="fas fa-exclamation-circle text-4xl text-red-500 mb-4"></i>
+            <h3 class="text-xl font-bold mb-2">¿Eliminar?</h3>
+            <p class="text-gray-500 mb-6">Esta acción borrará la pregunta y sus respuestas asociadas.</p>
+            <div class="flex gap-4 justify-center">
+                <button onclick="closeDeleteModal()"
+                    class="px-4 py-2 bg-gray-200 rounded-lg font-bold text-gray-700">Cancelar</button>
+                <button onclick="confirmDelete()"
+                    class="px-4 py-2 bg-red-600 rounded-lg font-bold text-white hover:bg-red-700">Sí, Eliminar</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/js/update.js"></script>
+    <script src="/static/js/maintenance.js"></script>
+    <script src="/static/js/notifications.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <script src="/static/js/csrf.js"></script>
+    <link rel="icon" type="image/x-icon" href="/static/img/canels-icon.png">
+    <link rel="stylesheet" href="/static/src/tailwindcss.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+    <title>Canels</title>
+</head>
+
+<body class="bg-gray-100 min-h-screen font-display">
+    <header class="bg-primary shadow-md w-full font-sans">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col md:flex-row justify-between items-center h-auto md:h-24 py-4 md:py-0">
+                
+                <a class="flex-shrink-0 flex items-center bg-white p-3 rounded-xl mb-4 md:mb-0 hover:shadow-lg transition duration-300" href="index.html">
+                    <img class="h-10 md:h-12 w-auto" src="/static/img/canels-Logo.png" alt="Logo Canels">
+                </a>
+
+                <nav class="flex flex-wrap justify-center md:justify-end items-center gap-3 md:gap-6 w-full md:w-auto">
+                    
+                    <a href="analitica.html" class="text-white font-bold text-sm md:text-base transition px-2 py-1 rounded hover:bg-white/10">Analítica</a>
+                    
+                    <a href="grafico.html" 
+                       class="text-white font-bold text-sm md:text-base transition px-2 py-1 rounded hover:bg-white/10"
+                       {% if user_rol not in ['admin', 'analista'] %}onclick="event.preventDefault(); alert('Acceso restringido: Solo Administradores y Analistas.')"{% endif %}>
+                       Gráfico
+                    </a>
+
+                    <a href="update.html" 
+                       class="text-white font-bold text-sm md:text-base transition px-2 py-1 rounded hover:bg-white/10"
+                       {% if user_rol != 'admin' %}onclick="event.preventDefault(); alert('Acceso restringido: Solo Administradores.')"{% endif %}>
+                       Preguntas
+                    </a>
+
+                    <a href="import_export.html" 
+                       class="text-white font-bold text-sm md:text-base transition px-2 py-1 rounded hover:bg-white/10"
+                       {% if user_rol != 'admin' %}onclick="event.preventDefault(); alert('Acceso restringido: Solo Administradores.')"{% endif %}>
+                       Datos
+                    </a>
+
+                    <div class="relative">
+                        <button id="notificationBtn" onclick="toggleNotifications()"
+                            class="relative text-white hover:bg-white/10 p-2 rounded-lg transition">
+                            <i class="fas fa-bell text-xl"></i>
+                            <!-- Badge de conteo (oculto por defecto) -->
+                            <span id="notificationBadge"
+                                class="hidden absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center animate-pulse">
+                                0
+                            </span>
+                        </button>
+                    </div>
+
+                    <a href="/logout" 
+                       class="ml-2 bg-white-light hover:bg-red-100 text-black text-xs md:text-sm font-bold py-2 px-4 rounded-lg flex items-center gap-2 transition shadow-md hover:scale-105 transform">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span>Salir</span>
+                    </a>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <div id="notificationPanel"
+        class="hidden fixed top-24 right-4 md:right-8 z-50 bg-white rounded-2xl shadow-2xl border border-gray-200 w-full md:w-[500px] max-w-[95vw] max-h-[600px] overflow-hidden"
+        style="transform: translateY(-20px); opacity: 0; transition: all 0.3s ease;">
+
+        <!-- Header del Panel -->
+        <div class="bg-gradient-to-r from-primary to-blue-600 text-white p-4 flex justify-between items-center">
+            <div class="flex items-center gap-2">
+                <i class="fas fa-calendar-alt text-xl"></i>
+                <h3 class="font-bold text-lg">Mantenimientos Programados</h3>
+            </div>
+            <button onclick="toggleNotifications()" class="hover:bg-white/20 p-2 rounded-lg transition">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <!-- Contenido del Panel -->
+        <div id="notificationContent" class="overflow-y-auto max-h-[500px] p-4">
+            <!-- Se llenará dinámicamente con JavaScript -->
+            <div class="flex flex-col items-center justify-center py-12 text-gray-400">
+                <i class="fas fa-spinner fa-spin text-4xl mb-3"></i>
+                <p>Cargando notificaciones...</p>
+            </div>
+        </div>
+
+        <!-- Footer del Panel -->
+        <div class="bg-gray-50 border-t border-gray-200 p-3 text-center">
+            <a href="maintenance.html" class="text-sm text-primary hover:text-blue-700 font-semibold">
+                Ver agenda completa <i class="fas fa-arrow-right ml-1"></i>
+            </a>
+        </div>
+    </div>
+
+    <main class="max-w-7xl mx-auto px-4 pt-8 pb-20">
+        <h1 class="text-center text-black font-bold text-3xl mb-8">Gráfico</h1>
+
+        <div class="flex justify-end items-center mb-4">
+            <div class="flex items-center gap-3 bg-white p-3 rounded-xl shadow-sm border border-gray-200">
+                <label class="text-xs font-bold text-gray-500 uppercase tracking-wide">
+                    <i class="far fa-calendar-alt mr-1"></i> Periodo:
+                </label>
+                <select id="globalPeriodo" onchange="loadChartOptions()" class="bg-transparent text-gray-800 font-bold outline-none text-sm cursor-pointer border-b border-transparent hover:border-gray-300 transition pr-2">
+                    </select>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-10">
+
+            <div class="bg-gray-general rounded-2xl p-6 lg:col-span-2 shadow-md relative">
+                <div class="mb-6">
+                    <h2 class="text-black font-bold text-xl inline-block">Graficar</h2>
+                    <div class="h-1.5 w-16 bg-amber-500 mt-1 rounded-full"></div>
+                </div>
+
+                <form id="chartFiltersForm">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+
+                        <select id="chartGenero"
+                            class="py-2 px-4 rounded-lg outline-none focus:ring-2 focus:ring-teal-500 shadow-sm font-bold text-gray-600 bg-white">
+                            <option value="">Género (Todos)</option>
+                            <option value="Masculino">Masculino</option>
+                            <option value="Femenino">Femenino</option>
+                        </select>
+
+                        <select id="chartPlanta" onchange="filterChartAreas()"
+                            class="py-2 px-4 rounded-lg outline-none focus:ring-2 focus:ring-teal-500 shadow-sm font-bold text-gray-600 bg-white">
+                            <option value="">Cargando...</option>
+                        </select>
+
+                        <select id="chartArea" disabled
+                            class="py-2 px-4 rounded-lg outline-none focus:ring-2 focus:ring-teal-500 shadow-sm font-bold text-gray-600 bg-white disabled:opacity-70">
+                            <option value="">Selecciona Centro de Trabajo</option>
+                        </select>
+
+                        <select id="chartAntiguedad"
+                            class="py-2 px-4 rounded-lg outline-none focus:ring-2 focus:ring-teal-500 shadow-sm font-bold text-gray-600 bg-white">
+                            <option value="">Antigüedad (Todas)</option>
+                            <option value="1">Menos de 1 año</option>
+                            <option value="1-5">1 a 5 años</option>
+                            <option value="5+">Más de 5 años</option>
+                        </select>
+                    </div>
+
+                    <div class="flex flex-col md:flex-row justify-center items-center gap-6">
+
+                        <div class="relative group">
+                            <button type="button" onclick="openChartModal()"
+                                class="text-button-light text-4xl hover:text-teal-600 transition transform hover:scale-110"
+                                title="Seleccionar Categorías">
+                                <i class="fas fa-plus-circle"></i>
+                            </button>
+                            <span
+                                class="absolute bottom-full mb-2 hidden group-hover:block bg-gray-800 text-white text-xs rounded py-1 px-2 whitespace-nowrap">
+                                Seleccionar Categorías
+                            </span>
+                        </div>
+
+                        <button type="button" onclick="generarGrafico()"
+                            class="bg-button-light hover:bg-teal-600 text-white font-bold py-2 px-12 rounded-lg shadow-md transition transform hover:-translate-y-0.5 w-full md:w-auto">
+                            Generar Gráfica
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="bg-gray-general rounded-2xl p-6 shadow-md flex flex-col h-full opacity-90">
+                <div class="mb-4">
+                    <h2 class="text-black font-bold text-xl inline-block">Reporte</h2>
+                    <div class="h-1.5 w-16 bg-amber-500 mt-1 rounded-full"></div>
+                </div>
+                
+                <p class="text-gray-600 text-sm mb-6">
+                    Genera un documento Word con la gráfica actual y las estadísticas filtradas por Centro de Trabajo seleccionada a la izquierda.
+                </p>
+
+                {% if user_rol != 'consulta' %}
+                <button onclick="descargarReporteWord()" class="bg-button-light hover:bg-teal-600 text-white font-bold py-2 px-12 ...">
+                    <i class="fas fa-file-word mr-2"></i> Generar Word
+                </button>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="flex flex-col items-center justify-center">
+            <div class="bg-white border border-gray-100 rounded-2xl p-8 w-full max-w-5xl shadow-xl ring-1 ring-black/5 relative">
+                <h3 id="chartTitle" class="text-center text-gray-800 font-bold text-xl mb-4">Resultados por Categoría
+                </h3>
+                <div class="relative h-80 w-full">
+                    <canvas id="chartCondiciones"></canvas>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div id="chartModal"
+        class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm">
+        <div class="bg-white rounded-xl shadow-2xl p-6 w-full max-w-lg transform transition-all scale-100">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold text-gray-800">Seleccionar Categorías a Graficar</h3>
+                <button type="button" onclick="closeChartModal()" class="text-gray-400 hover:text-red-500 text-xl"><i
+                        class="fas fa-times"></i></button>
+            </div>
+
+            <p class="text-sm text-gray-600 mb-4">Selecciona las métricas:</p>
+
+            <div id="chartCategoriesContainer"
+                class="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-60 overflow-y-auto mb-6 p-2 bg-gray-50 rounded border">
+            </div>
+
+            <div class="flex justify-end gap-3">
+                <button type="button" onclick="closeChartModal()"
+                    class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 font-bold">Cancelar</button>
+                <button type="button" onclick="generarGrafico()"
+                    class="px-6 py-2 bg-button-light text-white rounded-lg hover:bg-teal-600 font-bold shadow">Graficar</button>
+            </div>
+        </div>
+    </div>
+
+<script src="/static/js/grafica_page.js"></script>
+<script src="/static/js/maintenance.js"></script>
+<script src="/static/js/notifications.js"></script>
+</body>
+</html>
+

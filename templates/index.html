@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <script src="/static/js/csrf.js"></script>
+    <link rel="icon" type="image/x-icon" href="/static/img/canels-icon.png">
+    <link rel="stylesheet" href="/static/src/tailwindcss.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+    <title>Canels</title>
+</head>
+
+<body class="bg-gray-100 min-h-screen font-display">
+    <header class="bg-primary shadow-md w-full font-sans">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col md:flex-row justify-between items-center h-auto md:h-24 py-4 md:py-0">
+                <a class="flex-shrink-0 flex items-center bg-white p-3 rounded-xl mb-4 md:mb-0 hover:shadow-lg transition duration-300" href="index.html">
+                    <img class="h-10 md:h-12 w-auto" src="/static/img/canels-Logo.png" alt="Logo Canels">
+                </a>
+                <nav class="flex flex-wrap justify-center md:justify-end items-center gap-3 md:gap-6 w-full md:w-auto">
+                    <a href="analitica.html" class="text-white font-bold text-sm md:text-base transition px-2 py-1 rounded hover:bg-white/10">Analítica</a>
+                    {% if user_rol in ['admin', 'analista'] %}
+                    <a href="grafico.html" class="text-white font-bold text-sm md:text-base transition px-2 py-1 rounded hover:bg-white/10">Gráfico</a>
+                    {% endif %}
+                    {% if user_rol == 'admin' %}
+                    <a href="update.html" class="text-white font-bold text-sm md:text-base transition px-2 py-1 rounded hover:bg-white/10">Preguntas</a>
+                    <a href="import_export.html" class="text-white font-bold text-sm md:text-base transition px-2 py-1 rounded hover:bg-white/10">Datos</a>
+                    {% endif %}
+                    <div class="relative">
+                        <button id="notificationBtn" onclick="toggleNotifications()" class="relative text-white hover:bg-white/10 p-2 rounded-lg transition">
+                            <i class="fas fa-bell text-xl"></i>
+                            <span id="notificationBadge" class="hidden absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center animate-pulse">0</span>
+                        </button>
+                    </div>
+                    <a href="/logout" class="ml-2 bg-white-light hover:bg-red-100 text-black text-xs md:text-sm font-bold py-2 px-4 rounded-lg flex items-center gap-2 transition shadow-md hover:scale-105 transform">
+                        <i class="fas fa-sign-out-alt"></i><span>Salir</span>
+                    </a>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- Panel de notificaciones -->
+    <div id="notificationPanel" class="hidden fixed top-24 right-4 md:right-8 z-50 bg-white rounded-2xl shadow-2xl border border-gray-200 w-full md:w-[500px] max-w-[95vw] max-h-[600px] overflow-hidden" style="transform: translateY(-20px); opacity: 0; transition: all 0.3s ease;">
+        <div class="bg-gradient-to-r from-primary to-blue-600 text-white p-4 flex justify-between items-center">
+            <div class="flex items-center gap-2"><i class="fas fa-calendar-alt text-xl"></i><h3 class="font-bold text-lg">Mantenimientos Programados</h3></div>
+            <button onclick="toggleNotifications()" class="hover:bg-white/20 p-2 rounded-lg transition"><i class="fas fa-times"></i></button>
+        </div>
+        <div id="notificationContent" class="overflow-y-auto max-h-[500px] p-4">
+            <div class="flex flex-col items-center justify-center py-12 text-gray-400"><i class="fas fa-spinner fa-spin text-4xl mb-3"></i><p>Cargando notificaciones...</p></div>
+        </div>
+        <div class="bg-gray-50 border-t border-gray-200 p-3 text-center">
+            <a href="maintenance.html" class="text-sm text-primary hover:text-blue-700 font-semibold">Ver agenda completa <i class="fas fa-arrow-right ml-1"></i></a>
+        </div>
+    </div>
+
+    <main class="max-w-9/10 mx-auto px-2 pt-8">
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-2xl font-bold text-gray-800 mr-2">Vista General</h2>
+            <div class="flex flex-col items-center gap-1">
+                <label class="text-sm font-bold text-gray-600">Periodo:</label>
+                <select id="globalPeriodo" onchange="loadDashboardData()" class="bg-white border border-gray-300 text-gray-700 py-2 px-4 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 font-medium"></select>
+            </div>
+        </div>
+
+        <!-- KPIs -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-2">
+            <div class="bg-[#D9D9D9] p-6 rounded-2xl shadow text-center">
+                <h3 class="font-bold text-lg">Centros de Trabajo Totales</h3>
+                <p id="kpi-plantas" class="text-3xl font-bold">...</p>
+            </div>
+            <div class="bg-[#D9D9D9] p-6 rounded-2xl shadow text-center">
+                <h3 class="font-bold text-lg">Total de Empleados</h3>
+                <p id="kpi-empleados" class="text-3xl font-bold">...</p>
+            </div>
+            <div class="bg-[#D9D9D9] p-6 rounded-2xl shadow text-center">
+                <h3 class="font-bold text-lg">Áreas Totales</h3>
+                <p id="kpi-areas" class="text-3xl font-bold">...</p>
+            </div>
+            <div class="bg-[#D9D9D9] p-6 rounded-2xl shadow text-center">
+                <h3 class="font-bold text-lg">Satisfacción Promedio</h3>
+                <p id="kpi-satisfaccion" class="text-3xl font-bold">...</p>
+                <p id="kpi-satisfaccion-porcentaje" class="text-sm text-gray-600 mt-1">(0.00%)</p>
+            </div>
+        </div>
+
+        <!-- Población por Planta -->
+        <div class="mt-6 mb-6">
+            <div class="flex justify-between items-center mb-4">
+                <div>
+                    <h2 class="text-xl font-bold text-gray-800">Población por Centros de Trabajo</h2>
+                    <p class="text-sm text-gray-500">Población registrada vs. empleados encuestados en este periodo.</p>
+                </div>
+                <div class="bg-indigo-50 p-2.5 rounded-full text-indigo-700">
+                    <i class="fas fa-users text-lg"></i>
+                </div>
+            </div>
+            <div id="poblacionPlantaGrid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+                <p class="text-gray-400 text-sm text-center col-span-full py-4">Cargando datos de población...</p>
+            </div>
+        </div>
+
+        <!-- Gráficas principales -->
+        <div class="w-full grid grid-cols-1 mt-4 md:grid-cols-2 gap-8 mb-5">
+            <!-- Satisfacción por Planta -->
+            <div class="flex flex-col items-center relative">
+                <div class="flex justify-between items-center w-full mb-4">
+                    <h2 class="text-2xl font-bold text-black">Satisfacción por Centro de Trabajo</h2>
+                    <button onclick="downloadChart('chartSatisfaccion', 'Satisfaccion_Planta.png')"
+                        class="text-gray-400 hover:text-blue-600 p-2 rounded-lg hover:bg-blue-50 transition" title="Descargar PNG">
+                        <i class="fas fa-download text-sm"></i>
+                    </button>
+                </div>
+                <div class="relative h-80 w-full">
+                    <canvas id="chartSatisfaccion"></canvas>
+                </div>
+            </div>
+
+            <!-- Distribución de la Empresa -->
+            <div class="flex flex-col items-center relative">
+                <div class="flex justify-between items-center w-full mb-4">
+                    <h2 class="text-2xl font-bold text-black">Distribución de la Empresa</h2>
+                    <button onclick="downloadChart('chartDistribucion', 'Distribucion_Empresa.png')"
+                        class="text-gray-400 hover:text-blue-600 p-2 rounded-lg hover:bg-blue-50 transition" title="Descargar PNG">
+                        <i class="fas fa-download text-sm"></i>
+                    </button>
+                </div>
+                <div class="relative h-80 w-full flex justify-center">
+                    <canvas id="chartDistribucion"></canvas>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Evolución Histórica -->
+    <div class="mt-8 bg-white p-6 rounded-2xl shadow-lg border border-gray-100">
+        <div class="flex justify-between items-center mb-6">
+            <div>
+                <h2 class="text-xl font-bold text-gray-800">Evolución Histórica</h2>
+                <p class="text-sm text-gray-500">Tendencia de satisfacción global a través del tiempo.</p>
+            </div>
+            <div class="flex items-center gap-3">
+                <button onclick="downloadChart('historicalChart', 'Evolucion_Historica.png')"
+                    class="text-gray-400 hover:text-blue-600 p-2 rounded-lg hover:bg-blue-50 transition" title="Descargar PNG">
+                    <i class="fas fa-download text-sm"></i>
+                </button>
+                <div class="bg-blue-50 p-3 rounded-full text-blue-900">
+                    <i class="fas fa-chart-line text-xl"></i>
+                </div>
+            </div>
+        </div>
+        <div class="relative h-80 w-full">
+            <canvas id="historicalChart"></canvas>
+        </div>
+    </div>
+
+    <script src="/static/js/grafica_dashboard.js"></script>
+    <script src="/static/js/maintenance.js"></script>
+    <script src="/static/js/notifications.js"></script>
+</body>
+</html>

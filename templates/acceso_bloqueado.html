@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/x-icon" href="/static/img/canels-icon.png">
+    <link rel="stylesheet" href="/static/src/tailwindcss.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>Acceso Bloqueado - Canels</title>
+</head>
+
+<body class="bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen flex items-center justify-center font-sans">
+    <div class="max-w-md w-full px-6">
+        <div class="bg-white rounded-2xl shadow-2xl p-8 text-center">
+            <div class="mb-6">
+                <div class="inline-flex items-center justify-center w-16 h-16 bg-red-100 rounded-full mb-4">
+                    <i class="fas fa-lock text-red-600 text-3xl"></i>
+                </div>
+                <h1 class="text-2xl font-bold text-gray-800">Acceso Bloqueado</h1>
+            </div>
+
+            <div class="bg-red-50 border-l-4 border-red-500 p-4 rounded mb-6">
+                <p class="text-gray-700 mb-2">
+                    <span class="font-bold">{{ pagina }}</span> está disponible solo para usuarios con mayor nivel de permisos.
+                </p>
+                <p class="text-sm text-gray-600">
+                    Tu rol actual: <span class="font-bold capitalize text-red-600">{{ rol }}</span>
+                </p>
+            </div>
+
+            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+                <p class="text-sm text-gray-600">
+                    <i class="fas fa-info-circle text-blue-600 mr-2"></i>
+                    Si crees que esto es un error, contacta al administrador.
+                </p>
+            </div>
+
+            <a href="/index.html"
+                class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg transition transform hover:scale-105">
+                <i class="fas fa-arrow-left mr-2"></i>Volver al Dashboard
+            </a>
+        </div>
+
+        <p class="text-center text-gray-500 text-sm mt-6">&copy; 2026 Canel's. Todos los derechos reservados.</p>
+    </div>
+</body>
+
+</html>

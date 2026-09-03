@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <script src="/static/js/csrf.js"></script>
+    <title>Login - Canel's</title>
+    <link rel="icon" type="image/x-icon" href="/static/img/canels-icon.png">
+    <link rel="stylesheet" href="/static/src/tailwindcss.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body class="bg-gray-50 min-h-screen flex items-center justify-center font-sans">
+
+    <div class="max-w-md w-full px-6 relative z-10">
+        
+        <div class="flex justify-center mb-8">
+            <img class="h-20 w-auto object-contain drop-shadow-md" 
+                 src="/static/img/canels-Logo.png" 
+                 alt="Logo Canels"> 
+        </div>
+
+        <div class="bg-white py-10 px-8 shadow-2xl rounded-2xl border-t-4 border-blue-900">
+            <div class="mb-6 text-center">
+                <h2 class="text-3xl font-bold text-blue-900">Bienvenido</h2>
+                <p class="mt-2 text-sm text-gray-500">Sistema de Gestión Psicosocial</p>
+            </div>
+
+            <div id="errorMessage" class="hidden mb-4 bg-red-50 border-l-4 border-red-500 p-4 rounded animate-pulse">
+                <div class="flex items-center">
+                    <i class="fas fa-exclamation-circle text-red-500 mr-2"></i>
+                    <p class="text-sm text-red-700 font-bold" id="errorText"></p>
+                </div>
+            </div>
+
+            <form id="loginForm" class="space-y-6">
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-1">Usuario</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><i class="fas fa-user text-gray-400"></i></div>
+                        <input id="usuario" name="usuario" type="text" required class="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 outline-none transition sm:text-sm" placeholder="Usuario">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-1">Contraseña</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><i class="fas fa-lock text-gray-400"></i></div>
+                        <input id="password" name="password" type="password" required class="block w-full pl-10 pr-10 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 outline-none transition sm:text-sm" placeholder="••••••••">
+                        <button type="button" onclick="togglePasswordVisibility()" class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-blue-900 transition">
+                            <i id="passwordIcon" class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <button type="submit" id="btnSubmit" class="w-full py-3 px-4 rounded-lg shadow-md text-sm font-bold text-white bg-blue-900 hover:bg-blue-800 transition transform hover:-translate-y-0.5">
+                    <span>ENTRAR</span>
+                </button>
+            </form>
+
+            <div class="mt-6 flex items-center justify-between">
+                <span class="border-b w-1/5 lg:w-1/4 border-gray-300"></span>
+                <a href="#" onclick="openRegisterModal()" class="text-xs text-center text-gray-500 uppercase hover:text-blue-900 font-bold">Crear Cuenta</a>
+                <span class="border-b w-1/5 lg:w-1/4 border-gray-300"></span>
+            </div>
+        </div>
+        
+        <p class="mt-8 text-center text-xs text-gray-400">&copy; 2026 Canel's. Todos los derechos reservados.</p>
+    </div>
+
+    <div id="registerModal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black bg-opacity-60 backdrop-blur-sm transition-opacity">
+        <div class="bg-white rounded-xl shadow-2xl p-8 w-full max-w-md transform scale-100 transition-transform">
+            
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-bold text-gray-800">Nueva Cuenta</h3>
+                <button onclick="closeRegisterModal()" class="text-gray-400 hover:text-red-500 text-2xl">&times;</button>
+            </div>
+
+            <div id="regErrorMsg" class="hidden mb-4 bg-red-100 text-red-700 p-2 rounded text-sm font-bold text-center"></div>
+            <div id="regSuccessMsg" class="hidden mb-4 bg-green-100 text-green-700 p-2 rounded text-sm font-bold text-center"></div>
+
+            <form id="registerForm" class="space-y-4">
+                <div>
+                    <label class="text-xs font-bold text-gray-600 uppercase">Nombre Completo</label>
+                    <input name="nombre" type="text" required class="w-full p-2 border rounded focus:ring-2 focus:ring-teal-500 outline-none" placeholder="Ej. Juan Pérez">
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="text-xs font-bold text-gray-600 uppercase">Usuario</label>
+                        <input name="usuario" type="text" required class="w-full p-2 border rounded focus:ring-2 focus:ring-teal-500 outline-none" placeholder="jperez">
+                    </div>
+                    <div>
+                        <label class="text-xs font-bold text-gray-600 uppercase">Rol</label>
+                        <select name="rol" class="w-full p-2 border rounded focus:ring-2 focus:ring-teal-500 outline-none bg-white">
+                            <option value="consulta">Consulta</option>
+                            <option value="analista">Analista</option>
+                            <option value="admin">Administrador</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="relative">
+                    <label class="text-xs font-bold text-gray-600 uppercase">Contraseña</label>
+                    <input id="registerPassword" name="password" type="password" required class="w-full p-2 border rounded focus:ring-2 focus:ring-teal-500 outline-none pr-10" placeholder="••••••••">
+                    <button type="button" onclick="toggleRegPasswordVisibility()" class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-teal-600 transition" style="top: 1.5rem;">
+                        <i id="registerPasswordIcon" class="fas fa-eye"></i>
+                    </button>
+                </div>
+                
+                <!-- INDICADOR DE FORTALEZA DE CONTRASEÑA -->
+                <div id="passwordStrengthRegister" class="mt-1"></div>
+                
+                <!-- BOTÓN PARA GENERAR CONTRASEÑA SEGURA -->
+                <button type="button" onclick="generateSecurePassword()" class="w-full mt-2 bg-blue-100 hover:bg-blue-200 text-blue-700 font-bold py-2 rounded-lg transition text-sm flex items-center justify-center gap-2">
+                    <i class="fas fa-dice"></i> Generar contraseña segura
+                </button>
+
+                <div class="bg-yellow-50 p-3 rounded border border-yellow-200">
+                    <label class="text-xs font-bold text-yellow-800 uppercase flex items-center gap-1">
+                        <i class="fas fa-key"></i> Token de Autorización
+                    </label>
+                    <div class="relative mt-1">
+                        <input id="registerToken" name="token" type="password" required class="w-full p-2 border border-yellow-300 rounded focus:ring-2 focus:ring-yellow-500 outline-none text-sm pr-10" placeholder="Pide la clave al Admin">
+                        <button type="button" onclick="toggleRegTokenVisibility()" class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-yellow-600 transition">
+                            <i id="registerTokenIcon" class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                    <p class="text-[10px] text-yellow-600 mt-1">* Requerido para confirmar creación.</p>
+                </div>
+
+                <button type="submit" id="btnRegister" class="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-3 rounded-lg shadow mt-2 transition">
+                    REGISTRAR USUARIO
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script src="/static/js/login.js"></script>
+</body>
+</html>
